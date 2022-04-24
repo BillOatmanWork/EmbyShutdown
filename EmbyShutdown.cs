@@ -9,11 +9,9 @@ namespace EmbyShutdown
     class EmbyShutdown
     {
 
-        //private const string SessionFormat = "http://192.168.50.42:8096/emby/Sessions?api_key={0}";
-        //private const string ShutdownFormat = "http://192.168.50.42:8096/emby/System/Shutdown?api_key={0}";
+        private const string SessionFormat = "http://192.168.50.42:8096/emby/Sessions?api_key={0}";
 
-        private const string SessionFormat = "http://localhost:8096/emby/Sessions?api_key={0}";
-        private const string ShutdownFormat = "http://localhost:8096/emby/System/Shutdown?api_key={0}";
+        //private const string SessionFormat = "http://localhost:8096/emby/Sessions?api_key={0}";
 
         static void Main(string[] args)
         {
@@ -23,9 +21,9 @@ namespace EmbyShutdown
 
         public void RealMain(string[] args)
         {
-            System.Reflection.Assembly asm = System.Reflection.Assembly.GetExecutingAssembly();
-            string agent = "EmbyShutdown";
-            Console.WriteLine(agent);
+            
+            Console.WriteLine($"EmbyShutdown Verion: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
+            Console.WriteLine("");
 
             Uri uriResult;
             if (args.Length != 1)
@@ -37,7 +35,9 @@ namespace EmbyShutdown
             }
 
             string uriName = string.Format(SessionFormat, args[0]);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             bool result = Uri.TryCreate(uriName, UriKind.Absolute, out uriResult) && uriResult.Scheme == Uri.UriSchemeHttp;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             if (!result)
             {
                 Console.WriteLine("Invalid URI parameters");
@@ -52,37 +52,32 @@ namespace EmbyShutdown
                 bool usersOn = true;
                 while (usersOn == true)
                 {
-                    // Get active sessions
-                    HttpClient httpClient = new HttpClient();
-                    httpClient.DefaultRequestHeaders.Add("user-agent", agent);
-                    string sessionJson = httpClient.GetStringAsync(uriResult).Result;
-                    List<EmbySessionData> sessionList = JsonConvert.DeserializeObject<List<EmbySessionData>>(sessionJson);
-
-                    bool userFound = false;
-                    foreach(EmbySessionData ed in sessionList)
-                    {
-                        if (ed.UserName != null)
-                        {
-                            userFound = true;
-                            Console.WriteLine($"User {ed.UserName} is currently logged in.");
-                        }
-                    }
+#pragma warning disable CS8604 // Possible null reference argument.
+                    bool userFound = CheckForActiveSessions(uriResult);
+#pragma warning restore CS8604 // Possible null reference argument.
 
                     if (userFound == false)
                     {
-                        Console.WriteLine($"No users currently logged in.  Starting shutdown sequence.");
+                        Console.WriteLine("No users currently logged in.  Check again in 5 minutes just to make sure ...");
+                        Thread.Sleep(300000);
 
-                        // Shut down Emby
-                        uriName = string.Format(ShutdownFormat, args[0]);
-                        HttpClient httpClient2 = new HttpClient();
-                        httpClient2.DefaultRequestHeaders.Add("user-agent", agent);
-                        var crap = httpClient2.PostAsync(uriName, null).Result;
+                        userFound = CheckForActiveSessions(uriResult);
 
-                        Thread.Sleep(30000);
+                        if (userFound == false)
+                        {
+                            Console.WriteLine("No users currently logged in.  Starting shutdown sequence.");
 
-                        // Then Windows
-                        new Shutdown().DoExitWin(Shutdown.EWX_SHUTDOWN | Shutdown.EWX_FORCE);
+                            // Shut down Emby
+                            new ShutdownEmby().Shutdown(args[0]);
+
+                            Thread.Sleep(30000);
+
+                            // Then Windows
+                            new ShutdownWindows().DoExitWin(ShutdownWindows.EWX_SHUTDOWN | ShutdownWindows.EWX_FORCE);
+                        }
                     }
+
+                    Console.WriteLine("Users are currently logged in.  Wait 10 minutes and check again ...");
 
                     Thread.Sleep(600000);
                 }
@@ -96,6 +91,31 @@ namespace EmbyShutdown
             {
                 Console.WriteLine(err.Message);
             }
+        }
+
+        private bool CheckForActiveSessions(Uri uriResult)
+        {
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("user-agent", "EmbyShutdown");
+            string sessionJson = httpClient.GetStringAsync(uriResult).Result;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            List<EmbySessionData> sessionList = JsonConvert.DeserializeObject<List<EmbySessionData>>(sessionJson);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            bool userFound = false;
+            if (sessionList != null)
+            {
+                foreach (EmbySessionData ed in sessionList)
+                {
+                    if (ed.UserName != null)
+                    {
+                        userFound = true;
+                        Console.WriteLine($"User {ed.UserName} is currently logged in.");
+                    }
+                }
+            }
+
+            return userFound;
         }
     }
 }

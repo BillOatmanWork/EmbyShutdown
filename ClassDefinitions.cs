@@ -10,9 +10,9 @@ namespace EmbyShutdown
     public class EmbySessionData
     {
         [JsonProperty("UserName")]
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
 
         [JsonProperty("Client")]
-        public string Client { get; set; }
+        public string? Client { get; set; }
     }
 }
