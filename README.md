@@ -5,9 +5,7 @@ EmbyShutdown API_KEY
 <br/>
 To get Emby api key, as an admin in Emby go to dashboard > advanced > security and generate one
 <br/> <br/>
-<i>This program needs to be run on the Emby Server.</i>
-<br/> <br/>
-<i>This program is written in C# for NET6. Therefore it can be built to run on more than just Windows.</i>
+<i>This program is Windows only, and needs to be run on the Emby Server.</i>
 <br/> <br/>
 Logic Flow:<br/>
 If one or more active users, wait for 10 minutes then check again <br/>
