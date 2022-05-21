@@ -9,9 +9,9 @@ namespace EmbyShutdown
     class EmbyShutdown
     {
 
-        private const string SessionFormat = "http://192.168.50.42:8096/emby/Sessions?api_key={0}";
+        //private const string SessionFormat = "http://192.168.50.42:{1}/emby/Sessions?api_key={0}";
 
-        //private const string SessionFormat = "http://localhost:8096/emby/Sessions?api_key={0}";
+        private const string SessionFormat = "http://localhost:{1}/emby/Sessions?api_key={0}";
 
         static void Main(string[] args)
         {
@@ -26,15 +26,15 @@ namespace EmbyShutdown
             Console.WriteLine("");
 
             Uri uriResult;
-            if (args.Length != 1)
+            if (args.Length != 2)
             {
-                Console.WriteLine("EmbyShutdown needs Emby API key paraeter.");
-                Console.WriteLine("EmbyShutdown API_KEY}");
+                Console.WriteLine("EmbyShutdown needs Emby API key parameter as well as the servers port.");
+                Console.WriteLine("EmbyShutdown API_KEY port");
                 Console.WriteLine("To get Emby api key go to dashboard>advanced>security and generate one");
                 return; 
             }
 
-            string uriName = string.Format(SessionFormat, args[0]);
+            string uriName = string.Format(SessionFormat, args[0], args[1]);
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             bool result = Uri.TryCreate(uriName, UriKind.Absolute, out uriResult) && uriResult.Scheme == Uri.UriSchemeHttp;
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
