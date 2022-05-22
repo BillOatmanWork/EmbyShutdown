@@ -14,5 +14,8 @@ namespace EmbyShutdown
 
         [JsonProperty("Client")]
         public string? Client { get; set; }
+
+        [JsonProperty("LastActivityDate")]
+        public string? LastActivityDate { get; set; }  // ($date-time)      
     }
 }

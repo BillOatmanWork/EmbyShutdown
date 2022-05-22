@@ -9,7 +9,7 @@ namespace EmbyShutdown
     class EmbyShutdown
     {
 
-        //private const string SessionFormat = "http://192.168.50.42:{1}/emby/Sessions?api_key={0}";
+       // private const string SessionFormat = "http://192.168.50.42:{1}/emby/Sessions?api_key={0}";
 
         private const string SessionFormat = "http://localhost:{1}/emby/Sessions?api_key={0}";
 
@@ -100,6 +100,7 @@ namespace EmbyShutdown
             string sessionJson = httpClient.GetStringAsync(uriResult).Result;
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             List<EmbySessionData> sessionList = JsonConvert.DeserializeObject<List<EmbySessionData>>(sessionJson);
+
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
             bool userFound = false;
@@ -109,8 +110,16 @@ namespace EmbyShutdown
                 {
                     if (ed.UserName != null)
                     {
-                        userFound = true;
-                        Console.WriteLine($"User {ed.UserName} is currently logged in.");
+                        DateTime.TryParse(ed.LastActivityDate, out DateTime lastActivity);
+                        TimeSpan inactivity = DateTime.Now - lastActivity;
+
+                        if (inactivity.TotalMinutes < 1)
+                        {
+                            userFound = true;
+                            Console.WriteLine($"User {ed.UserName} is currently logged in and inactive for {inactivity.TotalMinutes} minutes.");
+                        }
+                        else
+                            Console.WriteLine($"User {ed.UserName} is currently logged in but inactive for {inactivity.TotalMinutes} minutes so ignoring.");
                     }
                 }
             }
