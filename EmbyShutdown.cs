@@ -21,9 +21,10 @@ namespace EmbyShutdown
 
         public void RealMain(string[] args)
         {
-            
-            Console.WriteLine($"EmbyShutdown Verion: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
-            Console.WriteLine("");
+            File.Delete("EmbyShutdown.log");
+
+            ConsoleWithLog($"EmbyShutdown Verion: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
+            ConsoleWithLog("");
 
             Uri uriResult;
             if (args.Length != 2)
@@ -41,7 +42,7 @@ namespace EmbyShutdown
             if (!result)
             {
                 Console.WriteLine("Invalid URI parameters");
-                Console.WriteLine("EmbyShutdown API_KEY}");
+                Console.WriteLine("EmbyShutdown API_KEY port");
                 Console.WriteLine("To get Emby api key go to dashboard>advanced>security and generate one");
                 return;
             }
@@ -58,14 +59,14 @@ namespace EmbyShutdown
 
                     if (userFound == false)
                     {
-                        Console.WriteLine("No users currently logged in.  Check again in 5 minutes just to make sure ...");
+                        ConsoleWithLog("No users currently logged in.  Check again in 5 minutes just to make sure ...");
                         Thread.Sleep(300000);
 
                         userFound = CheckForActiveSessions(uriResult);
 
                         if (userFound == false)
                         {
-                            Console.WriteLine("No users currently logged in.  Starting shutdown sequence.");
+                            ConsoleWithLog("No users currently logged in.  Starting shutdown sequence.");
 
                             // Shut down Emby
                             new ShutdownEmby().Shutdown(args[0]);
@@ -74,10 +75,13 @@ namespace EmbyShutdown
 
                             // Then Windows
                             new ShutdownWindows().DoExitWin(ShutdownWindows.EWX_SHUTDOWN | ShutdownWindows.EWX_FORCE);
+
+                            // Wait for Windows to shut down
+                            Thread.Sleep(600000);
                         }
                     }
 
-                    Console.WriteLine("Users are currently logged in.  Wait 10 minutes and check again ...");
+                    ConsoleWithLog("Users are currently logged in.  Wait 10 minutes and check again ...");
 
                     Thread.Sleep(600000);
                 }
@@ -116,15 +120,25 @@ namespace EmbyShutdown
                         if (inactivity.TotalMinutes < 1)
                         {
                             userFound = true;
-                            Console.WriteLine($"User {ed.UserName} is currently logged in and inactive for {inactivity.TotalMinutes} minutes.");
+                            ConsoleWithLog($"User {ed.UserName} is currently logged in and inactive for {inactivity.TotalMinutes} minutes.");
                         }
                         else
-                            Console.WriteLine($"User {ed.UserName} is currently logged in but inactive for {inactivity.TotalMinutes} minutes so ignoring.");
+                            ConsoleWithLog($"User {ed.UserName} is currently logged in but inactive for {inactivity.TotalMinutes} minutes so ignoring.");
                     }
                 }
             }
 
             return userFound;
+        }
+
+        public static void ConsoleWithLog(string text)
+        {
+            Console.WriteLine(text);
+
+            using (StreamWriter file = File.AppendText("EmbyShutdown.log"))
+            {
+                file.Write(text + Environment.NewLine);
+            }
         }
     }
 }
