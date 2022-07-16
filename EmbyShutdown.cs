@@ -29,9 +29,9 @@ namespace EmbyShutdown
             Uri uriResult;
             if (args.Length != 2)
             {
-                Console.WriteLine("EmbyShutdown needs Emby API key parameter as well as the servers port.");
-                Console.WriteLine("EmbyShutdown API_KEY port");
-                Console.WriteLine("To get Emby api key go to dashboard>advanced>security and generate one");
+                ConsoleWithLog("EmbyShutdown needs Emby API key parameter as well as the servers port.");
+                ConsoleWithLog("EmbyShutdown API_KEY port");
+                ConsoleWithLog("To get Emby api key go to dashboard>advanced>security and generate one");
                 return; 
             }
 
@@ -41,9 +41,9 @@ namespace EmbyShutdown
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             if (!result)
             {
-                Console.WriteLine("Invalid URI parameters");
-                Console.WriteLine("EmbyShutdown API_KEY port");
-                Console.WriteLine("To get Emby api key go to dashboard>advanced>security and generate one");
+                ConsoleWithLog("Invalid URI parameters");
+                ConsoleWithLog("EmbyShutdown API_KEY port");
+                ConsoleWithLog("To get Emby api key go to dashboard>advanced>security and generate one");
                 return;
             }
 
@@ -89,11 +89,11 @@ namespace EmbyShutdown
             }
             catch (WebException wex)
             {
-                Console.WriteLine(wex.Message);
+                ConsoleWithLog(wex.Message);
             }
             catch (Exception err)
             {
-                Console.WriteLine(err.Message);
+                ConsoleWithLog(err.Message);
             }
         }
 
@@ -133,7 +133,7 @@ namespace EmbyShutdown
 
         public static void ConsoleWithLog(string text)
         {
-            Console.WriteLine(text);
+            ConsoleWithLog(text);
 
             using (StreamWriter file = File.AppendText("EmbyShutdown.log"))
             {
