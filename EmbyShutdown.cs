@@ -59,7 +59,7 @@ namespace EmbyShutdown
 
                     if (userFound == false)
                     {
-                        ConsoleWithLog("No users currently logged in.  Check again in 5 minutes just to make sure ...");
+                        ConsoleWithLog($"No users currently logged in.  Check again in 5 minutes just to make sure ({DateTime.Now.AddMinutes(5)}) ...");
                         Thread.Sleep(300000);
 
                         userFound = CheckForActiveSessions(uriResult);
@@ -81,7 +81,7 @@ namespace EmbyShutdown
                         }
                     }
 
-                    ConsoleWithLog("Users are currently logged in.  Wait 10 minutes and check again ...");
+                    ConsoleWithLog($"Users are currently logged in.  Wait 10 minutes and check again ... ({DateTime.Now.AddMinutes(10)})");
 
                     Thread.Sleep(600000);
                 }
@@ -133,7 +133,7 @@ namespace EmbyShutdown
 
         public static void ConsoleWithLog(string text)
         {
-            ConsoleWithLog(text);
+            Console.WriteLine(text);
 
             using (StreamWriter file = File.AppendText("EmbyShutdown.log"))
             {
