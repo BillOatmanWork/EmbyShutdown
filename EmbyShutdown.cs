@@ -23,7 +23,7 @@ namespace EmbyShutdown
         {
             File.Delete("EmbyShutdown.log");
 
-            ConsoleWithLog($"EmbyShutdown Verion: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
+            ConsoleWithLog($"EmbyShutdown Version: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
             ConsoleWithLog("");
 
             Uri uriResult;
