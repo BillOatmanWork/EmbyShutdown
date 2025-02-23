@@ -104,10 +104,10 @@ namespace EmbyShutdown
             string sessionJson = httpClient.GetStringAsync(uriResult).Result;
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
-            using (StreamWriter file = File.CreateText(@"ActiveSessions.json"))
-            {
-                file.Write(JsonPrettify(sessionJson));
-            }
+            //using (StreamWriter file = File.CreateText(@"ActiveSessions.json"))
+            //{
+            //    file.Write(JsonPrettify(sessionJson));
+            //}
 
             List<EmbySessionData> sessionList = JsonConvert.DeserializeObject<List<EmbySessionData>>(sessionJson);
 
