@@ -103,6 +103,12 @@ namespace EmbyShutdown
             httpClient.DefaultRequestHeaders.Add("user-agent", "EmbyShutdown");
             string sessionJson = httpClient.GetStringAsync(uriResult).Result;
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            using (StreamWriter file = File.CreateText(@"ActiveSessions.json"))
+            {
+                file.Write(JsonPrettify(sessionJson));
+            }
+
             List<EmbySessionData> sessionList = JsonConvert.DeserializeObject<List<EmbySessionData>>(sessionJson);
 
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -138,6 +144,23 @@ namespace EmbyShutdown
             using (StreamWriter file = File.AppendText("EmbyShutdown.log"))
             {
                 file.Write(text + Environment.NewLine);
+            }
+        }
+
+        /// <summary>
+        /// Indents and adds line breaks etc to make it pretty for printing/viewing
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        public static string JsonPrettify(string json)
+        {
+            using (var stringReader = new StringReader(json))
+            using (var stringWriter = new StringWriter())
+            {
+                var jsonReader = new JsonTextReader(stringReader);
+                var jsonWriter = new JsonTextWriter(stringWriter) { Formatting = Newtonsoft.Json.Formatting.Indented };
+                jsonWriter.WriteToken(jsonReader);
+                return stringWriter.ToString();
             }
         }
     }
